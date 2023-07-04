@@ -11,16 +11,19 @@ model = dict(generator=dict(out_channels=1), discriminator=dict(in_channels=1))
 # modify train_pipeline to load gray scale images
 train_pipeline = [
     dict(type="LoadImageFromFile", key="real_img", flag="grayscale", io_backend="disk"),
+    # dict(type="RandomCrop", crop_size=256),
+    # dict(type="RandomCrop", keys=["real_img"], scale=(256, 256)),
+    dict(type="Flip", keys=["real_img"], direction="horizontal"),
     dict(type="Resize", keys=["real_img"], scale=(64, 64)),
-    dict(type="Normalize", keys=["real_img"], mean=[127.5], std=[127.5], to_rgb=False),
+    dict(type="Normalize", keys=["real_img"], mean=[127.5], std=[127.5], to_rgb=True),
     dict(type="ImageToTensor", keys=["real_img"]),
     dict(type="Collect", keys=["real_img"], meta_keys=["real_img_path"]),
 ]
 
 # you must set `samples_per_gpu` and `imgs_root`
 data = dict(
-    samples_per_gpu=128,
-    train=dict(imgs_root="data/mnist/train", pipeline=train_pipeline),
+    samples_per_gpu=512,
+    train=dict(imgs_root="data/DFire/train", pipeline=train_pipeline),
     val=None,
 )
 
@@ -31,22 +34,22 @@ custom_hooks = [
     dict(
         type="VisualizeUnconditionalSamples",
         output_dir="training_samples",
-        interval=100,
+        interval=5,
     )
 ]
 
 log_config = dict(
     interval=100,
-    hooks=[
-        dict(type="TextLoggerHook"),
-    ],
+    # hooks=[
+    #     dict(type="TextLoggerHook"),
+    # ],
 )
 
-total_iters = 5000
+total_iters = 100000
 
 metrics = dict(
     ms_ssim10k=dict(type="MS_SSIM", num_images=10000),
-    swd16k=dict(type="SWD", num_images=16384, image_shape=(3, 64, 64)),
+    swd16k=dict(type="SWD", num_images=16384, image_shape=(1, 64, 64)),
 )
 
 optimizer = dict(

@@ -1,0 +1,5 @@
+data/
+env/
+work_dirs/
+*.pth
+.git/
